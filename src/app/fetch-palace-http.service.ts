@@ -26,7 +26,7 @@ export class FetchPalaceHttpService {
     this.heads.push(["Content-Type", "application/json"]);
     this.heads.push(["Accept", "application/json"]);
     // These always need to be set to get a valid response
-    this.heads.push(["apiKey", "3234f5b1-670a-443b-81d7-cdb3a28d5672"]);
+    this.heads.push(["apiKey", "put-your-own-key-here"]);
 
     this.headers = {};
 
