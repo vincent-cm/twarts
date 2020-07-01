@@ -29,7 +29,7 @@
 
 ## Key Features
 
-- Scrapping and downloading the high-resolutio images from https://www.npm.gov.tw/
+- Scrapping and downloading the high-resolution images from https://www.npm.gov.tw/
 
 ## How To Use
 
