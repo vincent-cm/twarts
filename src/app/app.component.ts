@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, OnInit, AfterViewInit, ChangeDetectorRef } from "@angular/core";
 import { CollectionReqDTO } from "./fetch-palace.model";
 import { FetchPalaceHttpService } from "./fetch-palace-http.service";
 import { catchError, first } from "rxjs/operators";
@@ -13,7 +13,7 @@ const chalk = require("chalk");
 const initUrl = 'https://theme.npm.edu.tw'
 const baseUrl = "/opendata/DigitImageSets.aspx";
 const baseUrlDownload = "/opendata/Authorize.aspx?sNo=";
-const basePage = 0;
+const basePage = 700;
 const outputFile = "data.json";
 const parsedResults = [];
 const downloadQueue = [];
@@ -26,20 +26,26 @@ let totalItem = 0;
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.scss"]
+  styleUrls: ["./app.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
-  title = "tw";
+export class AppComponent implements OnInit, AfterViewInit {
+  existingExport = existingExport;
+  statusArray = [] as any[];
+  title = "TwArts";
   isValid = true;
-  errorText = '';
+  loading = false;
+  errorText = [];
   successMessage = '';
-  constructor(public fetchPalaceHttpService: FetchPalaceHttpService) { }
+  constructor(public fetchPalaceHttpService: FetchPalaceHttpService, public cd: ChangeDetectorRef) {
+  }
   async getCollection() {
     const reqCollection: CollectionReqDTO = {
       limit: 20,
       offset: 0,
       lang: "cht"
     };
+    this.loading = true;
 
     const data = await this.fetchPalaceHttpService
       .fetchCollection(reqCollection)
@@ -51,10 +57,12 @@ export class AppComponent implements OnInit {
       )
       .toPromise();
 
+    this.loading = false;
     console.log(data);
   }
 
   async getScraper() {
+    this.loading = true;
     console.log(
       chalk.yellow.bgBlue(
         `\n  Scraping of ${chalk.underline.bold(baseUrl)} initiated...\n`
@@ -70,8 +78,9 @@ export class AppComponent implements OnInit {
       totalItem = +totalItemText.replace(/\D/g, '');
       totalItem = basePage ? totalItem - basePage * perPageItems : totalItem;
       pageLimit = Math.ceil(totalItem / perPageItems);
-      this.getWebsiteContent(url);
+      await this.getWebsiteContent(url);
     }
+    this.loading = false;
   }
 
   getWebsiteContent = async (currUrl) => {
@@ -97,23 +106,7 @@ export class AppComponent implements OnInit {
         parsedResults.push(metadata);
         downloadQueue.push(metadata);
       });
-
-      for (const item of downloadQueue) {
-        const downloadNo = '' + item.url.replace(/\D/g, '');
-        if (existingExport.includes(downloadNo)) {
-          console.log(`Skipping ${downloadNo}`);
-          continue;
-        }
-        try {
-          console.log(`Downloading ${item.title}`);
-          await this.download(this.fetchPalaceHttpService.CORS_PROXY + initUrl + baseUrlDownload + downloadNo, `${downloadNo}.zip`);
-          console.log(`Downloaded ${item.title}`);
-        } catch (e) {
-          console.log(`Error downloading ${item.title}, continue for next`);
-          continue;
-        }
-      }
-
+      await this.batchDownload(downloadQueue);
       downloadQueue.length = 0;
       const nextPageLink = $('#fixPagination .page .next-blk').find('a').attr('href')
       pageCounter++
@@ -123,10 +116,51 @@ export class AppComponent implements OnInit {
         return false
       }
 
-      this.getWebsiteContent(this.fetchPalaceHttpService.CORS_PROXY + initUrl + nextPageLink)
+      await this.getWebsiteContent(this.fetchPalaceHttpService.CORS_PROXY + initUrl + nextPageLink)
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async batchDownload(downloadQueue) {
+    const array = downloadQueue.map(this.delayedBatch.bind(this))
+    await Promise.all(array);
+  }
+
+  async delayedBatch(item) {
+    const downloadNo = '' + item.url.replace(/\D/g, '');
+    if (existingExport.includes(downloadNo)) {
+      console.log(`Skipping ${downloadNo}`);
+      this.statusArray.find(el => el.id === downloadNo)['status'] = 1;
+      this.statusArray = [...this.statusArray];
+      this.cd.detectChanges();
+      return;
+    }
+    try {
+      console.log(`Downloading ${item.title}`);
+      this.pushDownloadStatus(downloadNo, 2);
+      this.cd.detectChanges();
+      await this.download(this.fetchPalaceHttpService.CORS_PROXY + initUrl + baseUrlDownload + downloadNo, `${downloadNo}.zip`);
+      console.log(`Downloaded ${item.title}`);
+      this.statusArray.find(el => el.id === downloadNo)['status'] = 3;
+      this.statusArray = [...this.statusArray];
+      this.cd.detectChanges();
+      return;
+    } catch (e) {
+      console.log(`Error downloading ${item.title}, continue for next`);
+      this.statusArray.find(el => el.id === downloadNo)['status'] = 4;
+      this.statusArray = [...this.statusArray];
+      this.cd.detectChanges();
+      return;
+    }
+  }
+
+  pushDownloadStatus(itemId, status) {
+    this.statusArray.unshift({
+      id: itemId,
+      status: status
+    })
+    this.statusArray = [...this.statusArray];
   }
 
   exportResults = parsedResults => {
@@ -184,7 +218,7 @@ export class AppComponent implements OnInit {
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        this.errorText = "HTTP status error";
+        this.errorText.push("HTTP status error: " + filename);
         return;
       }
       let fileStream;
@@ -199,18 +233,18 @@ export class AppComponent implements OnInit {
       }
       const writer = fileStream.getWriter();
       const reader = response.body.getReader();
-      const res = await this.pump(reader, writer, fileSize);
+      const res = await this.pump(reader, writer, fileSize, filename);
       this.successMessage = filename + " done";
       setTimeout(() => {
         this.successMessage = "";
         return;
       });
     } catch (e) {
-      this.errorText = e.message;
+      this.errorText.push(e.message);
     }
   }
 
-  async pump(reader, writer, fileSize?) {
+  async pump(reader, writer, fileSize?, filename?) {
     let readByteCount = 0;
 
     const result = await reader.read();
@@ -219,21 +253,45 @@ export class AppComponent implements OnInit {
     } else {
       readByteCount += result.value.length;
       if (fileSize) {
-        this.successMessage = `Downloaded ${Math.ceil(
+        this.successMessage = `Downloaded ${filename} ${Math.ceil(
           (readByteCount / +fileSize) * 100
         )} %...`;
       } else {
-        this.successMessage = "Downloading...";
+        this.successMessage = `Downloading ${filename}...`;
       }
       const res = await writer.write(result.value)
-      this.pump(reader, writer, fileSize);
+      this.pump(reader, writer, fileSize, filename);
     }
   }
 
   ngOnInit() {
     if (!streamSaver.supported) {
       this.isValid = false;
-      this.errorText = 'Your browser does not support Streams or Service Worker :(';
+      this.errorText.push('Your browser does not support Streams or Service Worker :(');
     }
+    this.statusArray = existingExport.map(el => {
+      return {
+        id: el,
+        status: 0
+      }
+    })
+    this.cd.detectChanges();
+  }
+
+  ngAfterViewInit() {
+    (function () {
+      if (!console) {
+        console = {} as Console;
+      }
+      var old = console.log;
+      var logger = document.getElementById('log');
+      console.log = function (message) {
+        if (typeof message == 'object') {
+          logger.insertAdjacentHTML("afterbegin", (JSON && JSON.stringify ? JSON.stringify(message) : String(message)) + '<br />');
+        } else {
+          logger.insertAdjacentHTML("afterbegin", message + '<br />');
+        }
+      }
+    })();
   }
 }
