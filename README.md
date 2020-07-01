@@ -86,10 +86,6 @@ This software uses the following open-source packages:
 - [Node.js](https://nodejs.org/)
 - [axios](https://github.com/axios/axios)
 
-## Related
-
-[markdownify-web](https://github.com/amitmerchant1990/markdownify-web) - Web version of Markdownify
-
 ## Support
 
 <a href="https://www.buymeacoffee.com/vincent.cm" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 160px !important;" ></a>
