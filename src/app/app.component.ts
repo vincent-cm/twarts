@@ -13,7 +13,7 @@ const chalk = require("chalk");
 const initUrl = 'https://theme.npm.edu.tw'
 const baseUrl = "/opendata/DigitImageSets.aspx";
 const baseUrlDownload = "/opendata/Authorize.aspx?sNo=";
-const basePage = 700;
+const basePage = 0;
 const outputFile = "data.json";
 const parsedResults = [];
 const downloadQueue = [];
