@@ -70,7 +70,7 @@ Note: If you're using Linux Bash for Windows, [see this guide](https://www.howto
 
 ## Download
 
-You can now go to http://localhost:4200 and click `Get Scraper`
+You can now go to http://localhost:4401 and click `Get Scraper`
 There may be some pages, images populate errors, ignore them.
 After 999 images downloaded, Chrome may stop downloading more items.
 
