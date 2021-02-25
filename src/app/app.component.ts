@@ -129,9 +129,10 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   async delayedBatch(item) {
     const downloadNo = '' + item.url.replace(/\D/g, '');
-    if (existingExport.includes(downloadNo)) {
+    // Sometime the scrapped number is more or less digits than existing, but they are same
+    if (existingExport.find(item => downloadNo.includes(item) || item.includes(downloadNo))) {
       console.log(`Skipping ${downloadNo}`);
-      this.statusArray.find(el => el.id === downloadNo)['status'] = 1;
+      this.statusArray.find(el => downloadNo.includes(el.id) || el.id.includes(downloadNo))['status'] = 1;
       this.statusArray = [...this.statusArray];
       this.cd.detectChanges();
       return;
@@ -142,13 +143,13 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.cd.detectChanges();
       await this.download(this.fetchPalaceHttpService.CORS_PROXY + initUrl + baseUrlDownload + downloadNo, `${downloadNo}.zip`);
       console.log(`Downloaded ${item.title}`);
-      this.statusArray.find(el => el.id === downloadNo)['status'] = 3;
+      this.statusArray.find(el => downloadNo.includes(el.id) || el.id.includes(downloadNo))['status'] = 3;
       this.statusArray = [...this.statusArray];
       this.cd.detectChanges();
       return;
     } catch (e) {
       console.log(`Error downloading ${item.title}, continue for next`);
-      this.statusArray.find(el => el.id === downloadNo)['status'] = 4;
+      this.statusArray.find(el => downloadNo.includes(el.id) || el.id.includes(downloadNo))['status'] = 4;
       this.statusArray = [...this.statusArray];
       this.cd.detectChanges();
       return;
