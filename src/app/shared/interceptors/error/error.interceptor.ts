@@ -22,12 +22,6 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       catchError(error => {
         let errorMessage;
-
-        /**
-         * Throws an error page for all tableau based requests
-         * Excluding the tableau/site.info endpoint - Which checks the user's credentials
-         * Catches 401's & all 500's
-         */
         if (error.status === 401 || error.status >= 500) {
           console.log(error);
         }

@@ -9,9 +9,12 @@ import { existingExport } from './existingExport';
 // global['Blob'] = Blob;
 const axios = require("axios");
 const cheerio = require("cheerio");
+const axiosRetry = require('axios-retry');
+axiosRetry(axios, { retryDelay: axiosRetry.exponentialDelay });
 const chalk = require("chalk");
 const initUrl = 'https://theme.npm.edu.tw'
 const baseUrl = "/opendata/DigitImageSets.aspx";
+const openDataUrl = "/opendata/";
 const baseUrlDownload = "/opendata/Authorize.aspx?sNo=";
 const basePage = 0;
 const outputFile = "data.json";
@@ -90,7 +93,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       const response = await axios(currUrl);
       const html = response.data;
       const $ = cheerio.load(html);
-      $("#fixPagination .wrap .painting-list .list").map((i, el) => {
+      $("#fixPagination .wrap .painting-list .list").map(async (i, el) => {
         const count = resultCount++;
         const title = $(el)
           .find("a")
@@ -103,6 +106,17 @@ export class AppComponent implements OnInit, AfterViewInit {
           title: title,
           url: url
         };
+        const responseItem = await axios(`${this.fetchPalaceHttpService.CORS_PROXY}${initUrl}${openDataUrl}${url}`);
+        const htmlItem = responseItem.data;
+        const $i = cheerio.load(htmlItem);
+        const elItem = $i("#fixPagination .project-detail ul li:last-child");
+        if (elItem && elItem[0]) {
+          const desc = $i(elItem[0]).text();
+          const descArr = desc.split('：');
+          const itemDesc = descArr.splice(1).join();
+          metadata['desc'] = itemDesc;
+        }
+        console.log(metadata);
         parsedResults.push(metadata);
         downloadQueue.push(metadata);
       });
