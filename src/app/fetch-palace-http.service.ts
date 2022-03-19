@@ -5,7 +5,7 @@ import { map } from "rxjs/operators";
 import { CollectionReqDTO, CollectionDetailReqDTO } from "./fetch-palace.model";
 
 @Injectable({
-  providedIn: "root"
+  providedIn: "root",
 })
 export class FetchPalaceHttpService {
   public readonly CORS_PROXY = "";
@@ -30,7 +30,7 @@ export class FetchPalaceHttpService {
 
     this.headers = {};
 
-    this.heads.map(arr => {
+    this.heads.map((arr) => {
       this.headers[arr[0]] = arr[1];
     });
     return this.headers;
@@ -46,7 +46,7 @@ export class FetchPalaceHttpService {
           `?limit=${collectionReqDTO.limit}&offset=${collectionReqDTO.offset}&lang=${collectionReqDTO.lang}`,
         { headers }
       )
-      .pipe(map(response => response.result));
+      .pipe(map((response) => response.result));
   }
 
   fetchCollectionDetail(
@@ -61,6 +61,6 @@ export class FetchPalaceHttpService {
           `/${collectionDetailReqDTO.collection_id}`,
         { headers }
       )
-      .pipe(map(response => response.result));
+      .pipe(map((response) => response.result));
   }
 }

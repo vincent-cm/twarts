@@ -1,18 +1,24 @@
-import { ChangeDetectionStrategy, Component, OnInit, AfterViewInit, ChangeDetectorRef } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  AfterViewInit,
+  ChangeDetectorRef,
+} from "@angular/core";
 import { CollectionReqDTO } from "./fetch-palace.model";
 import { FetchPalaceHttpService } from "./fetch-palace-http.service";
 import { catchError, first } from "rxjs/operators";
 import { of } from "rxjs";
-import streamSaver from 'StreamSaver';
-import { existingExport } from './existingExport';
+import streamSaver from "StreamSaver";
+import { existingExport } from "./existingExport";
 // import { Blob } from "blob-polyfill";
 // global['Blob'] = Blob;
-const axios = require("axios");
-const cheerio = require("cheerio");
-const axiosRetry = require('axios-retry');
+import cheerio from "cheerio";
+import axios from "axios";
+import axiosRetry from "axios-retry";
 axiosRetry(axios, { retryDelay: axiosRetry.exponentialDelay });
-const chalk = require("chalk");
-const initUrl = 'https://theme.npm.edu.tw'
+import chalk from "chalk";
+const initUrl = "https://theme.npm.edu.tw";
 const baseUrl = "/opendata/DigitImageSets.aspx";
 const openDataUrl = "/opendata/";
 const baseUrlDownload = "/opendata/Authorize.aspx?sNo=";
@@ -39,14 +45,17 @@ export class AppComponent implements OnInit, AfterViewInit {
   isValid = true;
   loading = false;
   errorText = [];
-  successMessage = '';
-  constructor(public fetchPalaceHttpService: FetchPalaceHttpService, public cd: ChangeDetectorRef) {
-  }
+  successMessage = "";
+  withDesc: boolean;
+  constructor(
+    public fetchPalaceHttpService: FetchPalaceHttpService,
+    public cd: ChangeDetectorRef
+  ) {}
   async getCollection() {
     const reqCollection: CollectionReqDTO = {
       limit: 20,
       offset: 0,
-      lang: "cht"
+      lang: "cht",
     };
     this.loading = true;
 
@@ -71,14 +80,16 @@ export class AppComponent implements OnInit, AfterViewInit {
         `\n  Scraping of ${chalk.underline.bold(baseUrl)} initiated...\n`
       )
     );
-    const url = `${this.fetchPalaceHttpService.CORS_PROXY}${initUrl}${baseUrl}${basePage ? '?pageNo=' + basePage : ''}`;
+    const url = `${this.fetchPalaceHttpService.CORS_PROXY}${initUrl}${baseUrl}${
+      basePage ? "?pageNo=" + basePage : ""
+    }`;
     const response = await axios(url);
     const html = response.data;
     const $ = cheerio.load(html);
     const list = $("#fixPagination .wrap .search-info li");
     if (list) {
       const totalItemText = $(list[1]).text();
-      totalItem = +totalItemText.replace(/\D/g, '');
+      totalItem = +totalItemText.replace(/\D/g, "");
       totalItem = basePage ? totalItem - basePage * perPageItems : totalItem;
       pageLimit = Math.ceil(totalItem / perPageItems);
       await this.getWebsiteContent(url);
@@ -86,67 +97,87 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.loading = false;
   }
 
-  getWebsiteContent = async (currUrl) => {
+  getWebsiteContent = async (currUrl: string) => {
     try {
-      console.log(chalk.cyan(`  Scraping: ${pageCounter} of ${pageLimit}`))
-      console.log(chalk.cyan(`  Scraping: ${currUrl}`))
+      console.log(chalk.cyan(`  Scraping: ${pageCounter} of ${pageLimit}`));
+      console.log(chalk.cyan(`  Scraping: ${currUrl}`));
       const response = await axios(currUrl);
       const html = response.data;
       const $ = cheerio.load(html);
-      $("#fixPagination .wrap .painting-list .list").map(async (i, el) => {
-        const count = resultCount++;
-        const title = $(el)
-          .find("a")
-          .attr("title");
-        const url = $(el)
-          .find("a")
-          .attr("href");
-        const metadata = {
-          count: count,
-          title: title,
-          url: url
-        };
-        const responseItem = await axios(`${this.fetchPalaceHttpService.CORS_PROXY}${initUrl}${openDataUrl}${url}`);
-        const htmlItem = responseItem.data;
-        const $i = cheerio.load(htmlItem);
-        const elItem = $i("#fixPagination .project-detail ul li:last-child");
-        if (elItem && elItem[0]) {
-          const desc = $i(elItem[0]).text();
-          const descArr = desc.split('：');
-          const itemDesc = descArr.splice(1).join();
-          metadata['desc'] = itemDesc;
+      const list = $("#fixPagination .wrap .painting-list .list");
+      // Switch to sync mode to parse items per page
+
+      // for (const el of list) {
+      // }
+      $("#fixPagination .wrap .painting-list .list").map(
+        async (i: any, el: any) => {
+          const count = resultCount++;
+          const title = $(el).find("a").attr("title");
+          const url = $(el).find("a").attr("href");
+          const metadata = {
+            count: count,
+            title: title,
+            url: url,
+          };
+          if (this.withDesc) {
+            const responseItem = await axios(
+              `${this.fetchPalaceHttpService.CORS_PROXY}${initUrl}${openDataUrl}${url}`
+            );
+            const htmlItem = responseItem.data;
+            const $i = cheerio.load(htmlItem);
+            const elItem = $i(
+              "#fixPagination .project-detail ul li:last-child"
+            );
+            if (elItem && elItem[0]) {
+              const desc = $i(elItem[0]).text();
+              const descArr = desc.split("：");
+              const itemDesc = descArr.splice(1).join();
+              metadata["desc"] = itemDesc;
+            }
+          }
+
+          console.log(metadata);
+          parsedResults.push(metadata);
+          downloadQueue.push(metadata);
         }
-        console.log(metadata);
-        parsedResults.push(metadata);
-        downloadQueue.push(metadata);
-      });
+      );
       await this.batchDownload(downloadQueue);
       downloadQueue.length = 0;
-      const nextPageLink = $('#fixPagination .page .next-blk').find('a').attr('href')
-      pageCounter++
+      const nextPageLink = $("#fixPagination .page .next-blk")
+        .find("a")
+        .attr("href");
+      pageCounter++;
 
       if (pageCounter === pageLimit) {
-        this.exportResults(parsedResults)
-        return false
+        await this.exportResults(parsedResults);
+        return false;
       }
 
-      await this.getWebsiteContent(this.fetchPalaceHttpService.CORS_PROXY + initUrl + nextPageLink)
+      await this.getWebsiteContent(
+        this.fetchPalaceHttpService.CORS_PROXY + initUrl + nextPageLink
+      );
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  async batchDownload(downloadQueue) {
-    const array = downloadQueue.map(this.delayedBatch.bind(this))
+  async batchDownload(downloadQueue: any[]) {
+    // for (const item of downloadQueue) {
+    //   await this.delayedBatch(item);
+    // }
+    const array = downloadQueue.map(this.delayedBatch.bind(this));
     await Promise.all(array);
   }
 
-  async delayedBatch(item) {
-    const downloadNo = '' + item.url.replace(/\D/g, '');
+  async delayedBatch(item: { url: string; title: any }) {
+    const downloadNo = "" + item.url.replace(/\D/g, "");
     // Sometime the scrapped number is more or less digits than existing, but they are same
-    if (existingExport.find(item => downloadNo.includes(item) || item.includes(downloadNo))) {
+    if (existingExport.find((exist) => exist.includes(downloadNo))) {
       console.log(`Skipping ${downloadNo}`);
-      this.statusArray.find(el => downloadNo.includes(el.id) || el.id.includes(downloadNo))['status'] = 1;
+      this.statusArray.find(
+        (exist) =>
+          downloadNo.includes(exist.id) || exist.id.includes(downloadNo)
+      )["status"] = 1;
       this.statusArray = [...this.statusArray];
       this.cd.detectChanges();
       return;
@@ -155,66 +186,83 @@ export class AppComponent implements OnInit, AfterViewInit {
       console.log(`Downloading ${item.title}`);
       this.pushDownloadStatus(downloadNo, 2);
       this.cd.detectChanges();
-      await this.download(this.fetchPalaceHttpService.CORS_PROXY + initUrl + baseUrlDownload + downloadNo, `${downloadNo}.zip`);
+      await this.download(
+        this.fetchPalaceHttpService.CORS_PROXY +
+          initUrl +
+          baseUrlDownload +
+          downloadNo,
+        `${downloadNo}.zip`
+      );
       console.log(`Downloaded ${item.title}`);
-      this.statusArray.find(el => downloadNo.includes(el.id) || el.id.includes(downloadNo))['status'] = 3;
+      this.statusArray.find(
+        (exist) =>
+          downloadNo.includes(exist.id) || exist.id.includes(downloadNo)
+      )["status"] = 3;
       this.statusArray = [...this.statusArray];
       this.cd.detectChanges();
       return;
     } catch (e) {
       console.log(`Error downloading ${item.title}, continue for next`);
-      this.statusArray.find(el => downloadNo.includes(el.id) || el.id.includes(downloadNo))['status'] = 4;
+      this.statusArray.find(
+        (exist) =>
+          downloadNo.includes(exist.id) || exist.id.includes(downloadNo)
+      )["status"] = 4;
       this.statusArray = [...this.statusArray];
       this.cd.detectChanges();
       return;
     }
   }
 
-  pushDownloadStatus(itemId, status) {
+  pushDownloadStatus(itemId: string, status: number) {
     this.statusArray.unshift({
       id: itemId,
-      status: status
-    })
+      status: status,
+    });
     this.statusArray = [...this.statusArray];
   }
 
-  exportResults = parsedResults => {
+  exportResults = async (parsedResults: string | any[]) => {
     // Saving a blob is as simple as the fetch example, you just get the
     // readableStream from the blob by calling blob.stream() to get a
     // readableStream and then pipe it
-    const blob = new Blob([JSON.stringify(parsedResults, null, 4)])
-    const fileStream = streamSaver.createWriteStream(`report-${this.getFormattedTime()}.json`, {
-      size: blob.size // Makes the procentage visiable in the download
-    })
+    const blob = new Blob([JSON.stringify(parsedResults, null, 4)]);
+    const fileStream = streamSaver.createWriteStream(
+      `report-${this.getFormattedTime()}.json`,
+      {
+        size: blob.size, // Makes the procentage visiable in the download
+      }
+    );
 
     // One quick alternetive way if you don't want the hole blob.js thing:
-    const readableStream = new Response(blob).body
+    const readableStream = new Response(blob).body;
     // const readableStream = blob.stream()
 
     // more optimized pipe version
     // (Safari may have pipeTo but it's useless without the WritableStream)
     if (window.WritableStream && readableStream.pipeTo) {
-      return readableStream.pipeTo(fileStream)
-        .then(() => console.log(
-          chalk.yellow.bgBlue(
-            `\n ${chalk.underline.bold(
-              parsedResults.length
-            )} Results exported successfully to ${chalk.underline.bold(
-              outputFile
-            )}\n`
-          )
-        ))
+      await readableStream.pipeTo(fileStream);
+      return console.log(
+        chalk.yellow.bgBlue(
+          `\n ${chalk.underline.bold(
+            parsedResults.length
+          )} Results exported successfully to ${chalk.underline.bold(
+            outputFile
+          )}\n`
+        )
+      );
     }
 
     // Write (pipe) manually
-    const writer = fileStream.getWriter()
+    const writer = fileStream.getWriter();
 
-    const reader = readableStream.getReader()
-    const pump = () => reader.read()
-      .then(res => res.done
-        ? writer.close()
-        : writer.write(res.value).then(pump))
-    pump()
+    const reader = readableStream.getReader();
+    const pump = () =>
+      reader
+        .read()
+        .then((res) =>
+          res.done ? writer.close() : writer.write(res.value).then(pump)
+        );
+    pump();
   };
 
   getFormattedTime() {
@@ -229,26 +277,23 @@ export class AppComponent implements OnInit, AfterViewInit {
     return y + "-" + m + "-" + d + "-" + h + "-" + mi + "-" + s;
   }
 
-  async download(url, filename) {
+  async download(url: RequestInfo, filename: string) {
     try {
       const response = await fetch(url);
       if (!response.ok) {
         this.errorText.push("HTTP status error: " + filename);
         return;
       }
-      let fileStream;
+      let fileStream: { getWriter: () => any };
       const fileSize = response.headers.get("Content-Length"); // looks like it's not working :(
       if (fileSize) {
-        fileStream = streamSaver.createWriteStream(
-          filename,
-          fileSize
-        );
+        fileStream = streamSaver.createWriteStream(filename, fileSize);
       } else {
         fileStream = streamSaver.createWriteStream(filename);
       }
       const writer = fileStream.getWriter();
       const reader = response.body.getReader();
-      const res = await this.pump(reader, writer, fileSize, filename);
+      await this.pump(reader, writer, fileSize, filename);
       this.successMessage = filename + " done";
       setTimeout(() => {
         this.successMessage = "";
@@ -259,7 +304,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  async pump(reader, writer, fileSize?, filename?) {
+  async pump(
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+    writer: { close: () => any; write: (arg0: any) => any },
+    fileSize?: string,
+    filename?: any
+  ) {
     let readByteCount = 0;
 
     const result = await reader.read();
@@ -274,7 +324,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       } else {
         this.successMessage = `Downloading ${filename}...`;
       }
-      const res = await writer.write(result.value)
+      await writer.write(result.value);
       this.pump(reader, writer, fileSize, filename);
     }
   }
@@ -282,14 +332,16 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     if (!streamSaver.supported) {
       this.isValid = false;
-      this.errorText.push('Your browser does not support Streams or Service Worker :(');
+      this.errorText.push(
+        "Your browser does not support Streams or Service Worker :("
+      );
     }
-    this.statusArray = existingExport.map(el => {
+    this.statusArray = existingExport.map((el) => {
       return {
         id: el,
-        status: 0
-      }
-    })
+        status: 0,
+      };
+    });
     this.cd.detectChanges();
   }
 
@@ -299,14 +351,19 @@ export class AppComponent implements OnInit, AfterViewInit {
         console = {} as Console;
       }
       var old = console.log;
-      var logger = document.getElementById('log');
-      console.log = function (message) {
-        if (typeof message == 'object') {
-          logger.insertAdjacentHTML("afterbegin", (JSON && JSON.stringify ? JSON.stringify(message) : String(message)) + '<br />');
+      var logger = document.getElementById("log");
+      console.log = function (message: string) {
+        if (typeof message == "object") {
+          logger.insertAdjacentHTML(
+            "afterbegin",
+            (JSON && JSON.stringify
+              ? JSON.stringify(message)
+              : String(message)) + "<br />"
+          );
         } else {
-          logger.insertAdjacentHTML("afterbegin", message + '<br />');
+          logger.insertAdjacentHTML("afterbegin", message + "<br />");
         }
-      }
+      };
     })();
   }
 }

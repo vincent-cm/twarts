@@ -1,7 +1,5 @@
 {
     "upgrade": true,
     "reject": [
-      "rxjs",
-      "typescript"
     ]
   }

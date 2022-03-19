@@ -262,8 +262,7 @@
 
   /* Responsive Styles */
   @media screen and (max-width: 767px) {
-
-    .card-container>*:not(.circle-link),
+    .card-container > *:not(.circle-link),
     .terminal {
       width: 100%;
     }
@@ -296,12 +295,18 @@
   <img height="80" alt="TwArts Logo" src="../assets/image/logo.svg" />
   <span>Welcome</span>
   <div class="spacer"></div>
-  <a aria-label="TwArts on github" target="_blank" rel="noopener" href="https://github.com/vincent-cm/twarts"
-    title="GitHub">
+  <a
+    aria-label="TwArts on github"
+    target="_blank"
+    rel="noopener"
+    href="https://github.com/vincent-cm/twarts"
+    title="GitHub"
+  >
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <title>GitHub icon</title>
       <path
-        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
     </svg>
   </a>
 </div>
@@ -309,42 +314,89 @@
 <div class="content" role="main">
   <!-- Highlight Card -->
   <div class="card highlight-card card-small">
-    <img height="100" src="../assets/image/logo.svg" alt="">
+    <img height="100" src="../assets/image/logo.svg" alt="" />
     <span>{{ title }} app is running!</span>
 
-    <svg id="rocket-smoke" alt="Rocket Ship Smoke" xmlns="http://www.w3.org/2000/svg" width="516.119" height="1083.632"
-      viewBox="0 0 516.119 1083.632">
-      <path id="Path_40" data-name="Path 40"
+    <svg
+      id="rocket-smoke"
+      alt="Rocket Ship Smoke"
+      xmlns="http://www.w3.org/2000/svg"
+      width="516.119"
+      height="1083.632"
+      viewBox="0 0 516.119 1083.632"
+    >
+      <path
+        id="Path_40"
+        data-name="Path 40"
         d="M644.6,141S143.02,215.537,147.049,870.207s342.774,201.755,342.774,201.755S404.659,847.213,388.815,762.2c-27.116-145.51-11.551-384.124,271.9-609.1C671.15,139.365,644.6,141,644.6,141Z"
-        transform="translate(-147.025 -140.939)" fill="#f5f5f5" />
+        transform="translate(-147.025 -140.939)"
+        fill="#f5f5f5"
+      />
     </svg>
   </div>
 
   <!-- Resources -->
+  <mat-slide-toggle
+    class="example-margin"
+    [color]="'warn'"
+    [checked]="withDesc"
+    (toggleChange)="withDesc = !withDesc"
+    [disabled]="!isValid || loading"
+  >
+    scrap description
+  </mat-slide-toggle>
   <h2>Run the scraper</h2>
   <p>Here are some links to help you get started:</p>
-  <small *ngIf="errorText" [ngStyle]="{color: 'FireBrick'}">{{errorText}}</small>
-  <small [ngStyle]="{color: 'green'}">{{successMessage}}</small>
+  <small *ngIf="errorText" [ngStyle]="{ color: 'FireBrick' }">{{
+    errorText
+  }}</small>
+  <small [ngStyle]="{ color: 'green' }">{{ successMessage }}</small>
   <div class="card-container">
-
-    <button class="card" mat-raised-button (click)="getScraper()" [disabled]="!isValid || loading">Run Scraper</button>
-    <button class="card" mat-raised-button (click)="getCollection()" [disabled]="!isValid || loading">Get Collection
-      (N/A)</button>
+    <button
+      class="card"
+      mat-raised-button
+      (click)="getScraper()"
+      [disabled]="!isValid || loading"
+    >
+      Run Scraper
+    </button>
+    <button
+      class="card"
+      mat-raised-button
+      (click)="getCollection()"
+      [disabled]="!isValid || loading"
+    >
+      Get Collection (N/A)
+    </button>
   </div>
 
   <!-- Next Steps -->
   <h2>Check Status</h2>
-  <p>Remember to replacing the `existingExport.ts` file for all the existing file has been downloaded</p>
+  <p>
+    Remember to replacing the `existingExport.ts` file for all the existing file
+    has been downloaded
+  </p>
 
   <input type="hidden" #selection />
 
   <!-- Terminal -->
   <div class="terminal">
-    <cdk-virtual-scroll-viewport itemSize="20" minBufferPx="200" maxBufferPx="400" class="status-scroll"
-      style="height: 400px">
+    <cdk-virtual-scroll-viewport
+      itemSize="20"
+      minBufferPx="200"
+      maxBufferPx="400"
+      class="status-scroll"
+      style="height: 400px"
+    >
       <span *cdkVirtualFor="let item of statusArray" class="status-item">
-        <span class="neumorphic variation2" [class.existing]="item.status === 0" [class.skipped]="item.status === 1"
-          [class.loading]="item.status === 2" [class.loaded]="item.status === 3" [class.failed]="item.status === 4">
+        <span
+          class="neumorphic variation2"
+          [class.existing]="item.status === 0"
+          [class.skipped]="item.status === 1"
+          [class.loading]="item.status === 2"
+          [class.loaded]="item.status === 3"
+          [class.failed]="item.status === 4"
+        >
           <ng-container [ngSwitch]="item.status">
             <span *ngSwitchCase="0">Existing</span>
             <span *ngSwitchCase="1">Skipped</span>
@@ -353,39 +405,81 @@
             <span *ngSwitchCase="4">Failed</span>
             <span *ngSwitchDefault>Existing</span>
           </ng-container>
-          <span><strong>{{item.id}}</strong></span>
+          <span
+            ><strong>{{ item.id }}</strong></span
+          >
         </span>
       </span>
     </cdk-virtual-scroll-viewport>
   </div>
-  <div class="terminal log" id="log" style="height: 200px; overflow:scroll">
-  </div>
+  <div
+    class="terminal log"
+    id="log"
+    style="height: 200px; overflow: scroll"
+  ></div>
 
   <!-- Links -->
   <div class="card-container">
-    <a class="circle-link" title="PayPal" href="https://paypal.me/vctsweet?locale.x=en_GB" target="_blank"
-      rel="noopener">
-      <svg role="img" viewBox="0 0 24 24" width="20px" height="20px" xmlns="http://www.w3.org/2000/svg">
+    <a
+      class="circle-link"
+      title="PayPal"
+      href="https://paypal.me/vctsweet?locale.x=en_GB"
+      target="_blank"
+      rel="noopener"
+    >
+      <svg
+        role="img"
+        viewBox="0 0 24 24"
+        width="20px"
+        height="20px"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <title>PayPal icon</title>
         <path
-          d="M6.908 24H3.804c-.664 0-1.086-.529-.936-1.18l.149-.674h2.071c.666 0 1.336-.533 1.482-1.182l1.064-4.592c.15-.648.816-1.18 1.48-1.18h.883c3.789 0 6.734-.779 8.84-2.34s3.16-3.6 3.16-6.135c0-1.125-.195-2.055-.588-2.789 0-.016-.016-.031-.016-.046l.135.075c.75.465 1.32 1.064 1.711 1.814.404.75.598 1.68.598 2.791 0 2.535-1.049 4.574-3.164 6.135-2.1 1.545-5.055 2.324-8.834 2.324h-.9c-.66 0-1.334.525-1.484 1.186L8.39 22.812c-.149.645-.81 1.17-1.47 1.17L6.908 24zm-2.677-2.695H1.126c-.663 0-1.084-.529-.936-1.18L4.563 1.182C4.714.529 5.378 0 6.044 0h6.465c1.395 0 2.609.098 3.648.289 1.035.189 1.92.519 2.684.99.736.465 1.322 1.072 1.697 1.818.389.748.584 1.68.584 2.797 0 2.535-1.051 4.574-3.164 6.119-2.1 1.561-5.056 2.326-8.836 2.326h-.883c-.66 0-1.328.524-1.478 1.169L5.7 20.097c-.149.646-.817 1.172-1.485 1.172l.016.036zm7.446-17.369h-1.014c-.666 0-1.332.529-1.48 1.178l-.93 4.02c-.15.648.27 1.179.93 1.179h.766c1.664 0 2.97-.343 3.9-1.021.929-.686 1.395-1.654 1.395-2.912 0-.83-.301-1.445-.9-1.84-.6-.404-1.5-.605-2.686-.605l.019.001z" />
+          d="M6.908 24H3.804c-.664 0-1.086-.529-.936-1.18l.149-.674h2.071c.666 0 1.336-.533 1.482-1.182l1.064-4.592c.15-.648.816-1.18 1.48-1.18h.883c3.789 0 6.734-.779 8.84-2.34s3.16-3.6 3.16-6.135c0-1.125-.195-2.055-.588-2.789 0-.016-.016-.031-.016-.046l.135.075c.75.465 1.32 1.064 1.711 1.814.404.75.598 1.68.598 2.791 0 2.535-1.049 4.574-3.164 6.135-2.1 1.545-5.055 2.324-8.834 2.324h-.9c-.66 0-1.334.525-1.484 1.186L8.39 22.812c-.149.645-.81 1.17-1.47 1.17L6.908 24zm-2.677-2.695H1.126c-.663 0-1.084-.529-.936-1.18L4.563 1.182C4.714.529 5.378 0 6.044 0h6.465c1.395 0 2.609.098 3.648.289 1.035.189 1.92.519 2.684.99.736.465 1.322 1.072 1.697 1.818.389.748.584 1.68.584 2.797 0 2.535-1.051 4.574-3.164 6.119-2.1 1.561-5.056 2.326-8.836 2.326h-.883c-.66 0-1.328.524-1.478 1.169L5.7 20.097c-.149.646-.817 1.172-1.485 1.172l.016.036zm7.446-17.369h-1.014c-.666 0-1.332.529-1.48 1.178l-.93 4.02c-.15.648.27 1.179.93 1.179h.766c1.664 0 2.97-.343 3.9-1.021.929-.686 1.395-1.654 1.395-2.912 0-.83-.301-1.445-.9-1.84-.6-.404-1.5-.605-2.686-.605l.019.001z"
+        />
       </svg>
     </a>
 
-    <a class="circle-link" title="BuyMeACoffee" href="https://www.buymeacoffee.com/vincent.cm" target="_blank"
-      rel="noopener">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" role="img" viewBox="0 0 24 24">
+    <a
+      class="circle-link"
+      title="BuyMeACoffee"
+      href="https://www.buymeacoffee.com/vincent.cm"
+      target="_blank"
+      rel="noopener"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20px"
+        height="20px"
+        role="img"
+        viewBox="0 0 24 24"
+      >
         <title>Buy Me A Coffee icon</title>
         <path
-          d="M6.898 0L5.682 2.799H3.877v2.523h.695L5.277 9.8H4.172l1.46 8.23.938-.01L7.512 24h8.918l.062-.4.88-5.58.888.01 1.46-8.231h-1.056l.705-4.477h.756V2.8h-1.918L16.99 0H6.898zm.528.805h9.043l.771 1.78H6.652l.774-1.78zm-2.75 2.797H19.32v.92H4.676v-.92zm.453 6.998h13.635l-1.176 6.62-5.649-.06-5.636.06-1.174-6.62z" />
+          d="M6.898 0L5.682 2.799H3.877v2.523h.695L5.277 9.8H4.172l1.46 8.23.938-.01L7.512 24h8.918l.062-.4.88-5.58.888.01 1.46-8.231h-1.056l.705-4.477h.756V2.8h-1.918L16.99 0H6.898zm.528.805h9.043l.771 1.78H6.652l.774-1.78zm-2.75 2.797H19.32v.92H4.676v-.92zm.453 6.998h13.635l-1.176 6.62-5.649-.06-5.636.06-1.174-6.62z"
+        />
       </svg>
     </a>
 
-    <a class="circle-link" title="Augury" href="https://www.patreon.com/vincent_cm" target="_blank" rel="noopener">
-      <svg role="img" viewBox="0 0 24 24" width="20px" height="20px" xmlns="http://www.w3.org/2000/svg">
+    <a
+      class="circle-link"
+      title="Augury"
+      href="https://www.patreon.com/vincent_cm"
+      target="_blank"
+      rel="noopener"
+    >
+      <svg
+        role="img"
+        viewBox="0 0 24 24"
+        width="20px"
+        height="20px"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <title>Patreon icon</title>
         <path
-          d="M15.386.524c-4.764 0-8.64 3.876-8.64 8.64 0 4.75 3.876 8.613 8.64 8.613 4.75 0 8.614-3.864 8.614-8.613C24 4.4 20.136.524 15.386.524M.003 23.537h4.22V.524H.003" />
+          d="M15.386.524c-4.764 0-8.64 3.876-8.64 8.64 0 4.75 3.876 8.613 8.64 8.613 4.75 0 8.614-3.864 8.614-8.613C24 4.4 20.136.524 15.386.524M.003 23.537h4.22V.524H.003"
+        />
       </svg>
     </a>
   </div>
@@ -393,29 +487,64 @@
   <!-- Footer -->
   <footer>
     Love TwArts?&nbsp;
-    <a href="https://github.com/vincent-cm/twarts" target="_blank" rel="noopener">
+    <a
+      href="https://github.com/vincent-cm/twarts"
+      target="_blank"
+      rel="noopener"
+    >
       Give our repo a star.
       <div class="github-star-badge">
-        <svg class="material-icons" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <svg
+          class="material-icons"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
           <path d="M0 0h24v24H0z" fill="none" />
-          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          <path
+            d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+          />
         </svg>
         Star
       </div>
     </a>
-    <a href="https://github.com/vincent-cm/twarts" target="_blank" rel="noopener">
-      <svg class="material-icons" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="#a8dab5" />
+    <a
+      href="https://github.com/vincent-cm/twarts"
+      target="_blank"
+      rel="noopener"
+    >
+      <svg
+        class="material-icons"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+          fill="#a8dab5"
+        />
         <path d="M0 0h24v24H0z" fill="none" />
       </svg>
     </a>
   </footer>
 
-  <svg id="clouds" alt="Gray Clouds Background" xmlns="http://www.w3.org/2000/svg" width="2611.084" height="485.677"
-    viewBox="0 0 2611.084 485.677">
-    <path id="Path_39" data-name="Path 39"
+  <svg
+    id="clouds"
+    alt="Gray Clouds Background"
+    xmlns="http://www.w3.org/2000/svg"
+    width="2611.084"
+    height="485.677"
+    viewBox="0 0 2611.084 485.677"
+  >
+    <path
+      id="Path_39"
+      data-name="Path 39"
       d="M2379.709,863.793c10-93-77-171-168-149-52-114-225-105-264,15-75,3-140,59-152,133-30,2.83-66.725,9.829-93.5,26.25-26.771-16.421-63.5-23.42-93.5-26.25-12-74-77-130-152-133-39-120-212-129-264-15-54.084-13.075-106.753,9.173-138.488,48.9-31.734-39.726-84.4-61.974-138.487-48.9-52-114-225-105-264,15a162.027,162.027,0,0,0-103.147,43.044c-30.633-45.365-87.1-72.091-145.206-58.044-52-114-225-105-264,15-75,3-140,59-152,133-53,5-127,23-130,83-2,42,35,72,70,86,49,20,106,18,157,5a165.625,165.625,0,0,0,120,0c47,94,178,113,251,33,61.112,8.015,113.854-5.72,150.492-29.764a165.62,165.62,0,0,0,110.861-3.236c47,94,178,113,251,33,31.385,4.116,60.563,2.495,86.487-3.311,25.924,5.806,55.1,7.427,86.488,3.311,73,80,204,61,251-33a165.625,165.625,0,0,0,120,0c51,13,108,15,157-5a147.188,147.188,0,0,0,33.5-18.694,147.217,147.217,0,0,0,33.5,18.694c49,20,106,18,157,5a165.625,165.625,0,0,0,120,0c47,94,178,113,251,33C2446.709,1093.793,2554.709,922.793,2379.709,863.793Z"
-      transform="translate(142.69 -634.312)" fill="#eee" />
+      transform="translate(142.69 -634.312)"
+      fill="#eee"
+    />
   </svg>
 </div>
 

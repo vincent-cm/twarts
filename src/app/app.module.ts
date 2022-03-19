@@ -8,8 +8,9 @@ import { HttpClientModule } from "@angular/common/http";
 import { FetchPalaceHttpService } from "./fetch-palace-http.service";
 import { ErrorInterceptorProvider } from "./shared/interceptors/error/error.interceptor";
 import { MatButtonModule } from "@angular/material/button";
+import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { MatBadgeModule } from "@angular/material/badge";
-import { CdkScrollableModule, ScrollingModule } from '@angular/cdk/scrolling';
+import { CdkScrollableModule, ScrollingModule } from "@angular/cdk/scrolling";
 
 @NgModule({
   declarations: [AppComponent],
@@ -20,10 +21,11 @@ import { CdkScrollableModule, ScrollingModule } from '@angular/cdk/scrolling';
     HttpClientModule,
     MatButtonModule,
     MatBadgeModule,
+    MatSlideToggleModule,
     CdkScrollableModule,
-    ScrollingModule
+    ScrollingModule,
   ],
   providers: [FetchPalaceHttpService, ErrorInterceptorProvider],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

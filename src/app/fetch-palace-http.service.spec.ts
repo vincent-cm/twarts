@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { FetchPalaceHttpService } from './fetch-palace-http.service';
+import { FetchPalaceHttpService } from "./fetch-palace-http.service";
 
-describe('FetchPalaceHttpService', () => {
+describe("FetchPalaceHttpService", () => {
   let service: FetchPalaceHttpService;
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('FetchPalaceHttpService', () => {
     service = TestBed.inject(FetchPalaceHttpService);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });
