@@ -74,7 +74,7 @@ You can now go to http://localhost:4401 and click `Get Scraper`
 There may be some pages, images populate errors, ignore them.
 After 999 images downloaded, Chrome may stop downloading more items.
 
-In this case, you have to collect the previously downloaded file names and put it into the array in `existingExport.ts`
+In this case, you have to collect the previously downloaded file names and run reduce.js and put them into the array in `output.txt`
 The official npm.gov.tw may upload more items over time, so enjoy.
 
 ## Credits

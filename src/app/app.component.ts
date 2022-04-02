@@ -10,7 +10,6 @@ import { FetchPalaceHttpService } from "./fetch-palace-http.service";
 import { catchError, first } from "rxjs/operators";
 import { of } from "rxjs";
 import streamSaver from "StreamSaver";
-import { existingExport } from "./existingExport";
 // import { Blob } from "blob-polyfill";
 // global['Blob'] = Blob;
 import cheerio from "cheerio";
@@ -39,7 +38,7 @@ let totalItem = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit, AfterViewInit {
-  existingExport = existingExport;
+  existingExport: any[] = [];
   statusArray = [] as any[];
   title = "TwArts";
   isValid = true;
@@ -172,7 +171,11 @@ export class AppComponent implements OnInit, AfterViewInit {
   async delayedBatch(item: { url: string; title: any }) {
     const downloadNo = "" + item.url.replace(/\D/g, "");
     // Sometime the scrapped number is more or less digits than existing, but they are same
-    if (existingExport.find((exist) => exist.includes(downloadNo))) {
+    if (
+      this.existingExport.find((exist: string | string[]) =>
+        exist.includes(downloadNo)
+      )
+    ) {
       console.log(`Skipping ${downloadNo}`);
       this.statusArray.find(
         (exist) =>
@@ -336,7 +339,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         "Your browser does not support Streams or Service Worker :("
       );
     }
-    this.statusArray = existingExport.map((el) => {
+    this.statusArray = this.existingExport.map((el: any) => {
       return {
         id: el,
         status: 0,
